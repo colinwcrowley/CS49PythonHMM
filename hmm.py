@@ -5,3 +5,5 @@ class HMM(object):
 
     def printA():
         print A
+
+# Coment
