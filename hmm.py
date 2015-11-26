@@ -1,8 +1,7 @@
-"""class HMM(object):
-    def __init__(self):"""
+class HMM(object):
+    def __init__(self):
+        self.N = 5
+        self.A = [[0 for i in range(N)] for i in range(N)]
 
-N = 5
-A = [[0 for i in range(N)] for i in range(N)]
-A[0][0] = 23
-
-print A
+    def printA():
+        print A
