@@ -4,7 +4,7 @@
 # grade the the grade that she give. (i.e. when arngy she gives lower
 # grades and when happy she gives higher grades)
 
-import hmm.py
+execfile("hmm.py")
 
 states = ["angry", "sad", "happy"]
 symbols = ["A", "B", "C", "D", "F"]
@@ -19,5 +19,7 @@ hmm.setB([[0.05, 0.15, 0.2, 0.25, 0.35],  # she ain't nice when angry!
           [0.4, 0.2, 0.1, 0.1, 0.1]])  # "I have such wonderful smart students :D"
 
 hmm.setPi([0.3, 0.3, 0.4])  # maybe happy at the begining of the year???
+
+print hmm.probabilityOfObservation(["A", "B", "A"])
 
 
