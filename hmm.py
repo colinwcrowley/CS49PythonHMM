@@ -1,8 +1,7 @@
-# I want an example to work with as we build this thing, and we can use
-# the weather example because that was for plain old Markov chain. So I
-# feel like a better example would be the mood of some professor and the
-# grade the the grade that she give. (i.e. when arngy she gives lower
-# grades and when happy she gives higher grades)
+# Note that the class does not generate outcomes, but rather tells you
+# the likely hood of given outcomes. I though this was a reasonable
+# implementation choice since we are only interested in EXPLAINGING an
+# observation sequence. We aren't trying to generate one.
 
 
 class HMM(object):
@@ -19,5 +18,29 @@ class HMM(object):
         self.pi = [0 for i in range(N)]
         # pi is the initial state probability distribution
 
-    def printA(self):
-        print self.A
+    def probabilityOfObservation(self, O):
+        # O is the list of observations, for which we will return the
+        # probability that they occur.
+        print "test"
+
+    def mostLikelyStateSequence(self, O):
+        # O is the list of observations, for which we will return the
+        # most likely state sequence
+        print "test"
+
+    def trainModel(self, O):
+        # O is the list of observations, with which we will adjust the
+        # parameters of the model to maximize the probability that they
+        # occur. You have to train the model, or else A, B, and pi won't
+        # be set.
+        print "test"
+
+    # These setters are for debuging purposes
+    def setA(self, A):
+        self.A = A
+
+    def setB(self, B):
+        self.B = B
+
+    def setPiB(self, pi):
+        self.pi = pi
