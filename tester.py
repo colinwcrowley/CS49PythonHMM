@@ -16,10 +16,18 @@ hmm.setA([[0.5, 0.25, 0.25],  # if she's angry, she'll probably stay angry
 
 hmm.setB([[0.05, 0.15, 0.2, 0.25, 0.35],  # she ain't nice when angry!
           [0.1, 0.6, 0.1, 0.1, 0.1],  # "don't feel like grading, I'll give em all B's"
-          [0.4, 0.2, 0.1, 0.1, 0.1]])  # "I have such wonderful smart students :D"
+          [0.4, 0.2, 0.2, 0.1, 0.1]])  # "I have such wonderful smart students :D"
 
 hmm.setPi([0.3, 0.3, 0.4])  # maybe happy at the begining of the year???
 
 print hmm.probabilityOfObservation(["A", "B", "A"])
+print hmm.beta(["A", "B", "A"], 0, 1)
 
-
+# sanity check to see that the probabilities add up to 1
+sum = 0
+for i in symbols:
+    for j in symbols:
+        for k in symbols:
+            sum += hmm.probabilityOfObservation([i, j, k])
+print "The sum is: "
+print sum

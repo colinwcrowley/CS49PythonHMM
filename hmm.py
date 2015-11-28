@@ -27,9 +27,18 @@ class HMM(object):
             sumOfPathProbs += self.alpha(O, t-1, h) * self.A[h][i]
         return sumOfPathProbs * self.B[i][self.V.index(O[t])]
 
+    def beta(self, O, t, i):
+        # backwards probability recursively defined
+        if t is len(O)-1:
+            return 1
+        sumOfPathProbs = 0
+        for h in range(self.N):
+            sumOfPathProbs += self.A[i][h] * self.B[h][self.V.index(O[t+1])] * self.beta(O, t+1, h)
+        return sumOfPathProbs
+
     def probabilityOfObservation(self, O):
-        # O is the list of observations (indecies), for which we will return the
-        # probability that they occur.
+        # O is the list of observations (indecies), for which we will
+        # return the probability that they occur.
         prob = 0
         for i in range(self.N):
             prob += self.alpha(O, len(O)-1, i)
