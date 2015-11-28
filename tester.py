@@ -20,8 +20,10 @@ hmm.setB([[0.05, 0.15, 0.2, 0.25, 0.35],  # she ain't nice when angry!
 
 hmm.setPi([0.3, 0.3, 0.4])  # maybe happy at the begining of the year???
 
+print "forward-backward probability:"
 print hmm.probabilityOfObservation(["A", "B", "A"])
-print hmm.beta(["A", "B", "A"], 0, 1)
+print "Viterbi most likely state sequence:"
+print hmm.mostLikelyStateSequence(["F", "F", "F"])
 
 # sanity check to see that the probabilities add up to 1
 sum = 0
