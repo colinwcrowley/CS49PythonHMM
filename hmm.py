@@ -4,6 +4,8 @@
 # observation sequence. We aren't trying to generate one.
 
 # helper functions
+
+
 def maximum(func, a, b):
     num = 0
     for i in range(a, b):
@@ -11,6 +13,7 @@ def maximum(func, a, b):
         if cur > num:
             num = cur
     return num
+
 
 def argmax(func, a, b):
     num = func(a)
@@ -22,6 +25,20 @@ def argmax(func, a, b):
             index = i
     return index
 
+
+def doubleSummation(func, a, b, x, y):
+    num = 0
+    for i in range(a, b):
+        for j in range(x, y):
+            num += func(i, j)
+    return num
+
+
+def summation(func, a, b):
+    num = 0
+    for i in range(a, b):
+        num += func(i)
+    return num
 
 class HMM(object):
     def __init__(self, Q, V):
@@ -47,8 +64,10 @@ class HMM(object):
         return sumOfPathProbs * self.B[i][self.V.index(O[t])]
 
     def beta(self, O, t, i):
+        print "t: ", t, " h: ", i
         # backwards probability recursively defined
         if t is len(O)-1:
+            print "base case!"
             return 1
         sumOfPathProbs = 0
         for h in range(self.N):
@@ -60,12 +79,22 @@ class HMM(object):
         # odservation sequence
         probOfObservation = 0
         for h in range(self.N):
+            print "t: ", t, " h: ", h
             probOfObservation += self.alpha(O, t, h) * self.beta(O, t, h)
         return self.alpha(O, t, i) * self.beta(O, t, i) / probOfObservation
+
+    def zeta(self, O, t, i, j):
+        num = 0
+        for i in range(self.N):
+            for j in range(self.N):
+                num += self.alpha(O, t, i) * self.A[i][j] * self.B[j][self.V.index(O[t+1])] * self.beta(O, t+1, j)
+        return self.alpha(O, t, i) * self.A[i][j] * self.B[j][self.V.index(O[t+1])] * self.beta(O, t+1, j) / num
+
 
     def probabilityOfObservation(self, O):
         # O is the list of observations (indecies), for which we will
         # return the probability that they occur.
+        # one two three
         prob = 0
         for i in range(self.N):
             prob += self.alpha(O, len(O)-1, i)
@@ -89,13 +118,13 @@ class HMM(object):
 
         for t in range(1, len(O)):
             for i in range(self.N):
-                lam = lambda x: delta[t-1][x]*self.A[x][i] # lambdas ftw
+                lam = lambda x: delta[t-1][x]*self.A[x][i]
                 delta[t][i] = maximum(lam, 0, self.N) * self.B[i][self.V.index(O[t])]
                 psi[t][i] = argmax(lam, 0, self.N)
 
-
         print " -> finished delta array:", delta
-        # now that we've covered all of the possibilities, let's choose
+
+        # Now that we've covered all of the possibilities, let's choose
         # the best one.
 
         lam2 = lambda x: delta[len(O)-1][x]
@@ -111,12 +140,54 @@ class HMM(object):
 
         return path
 
-    def trainModel(self, O):
+    def interateBaumWelch(self, O):
+        newPi = [self.gamma(O, 1, i) for i in range(self.N)]
+
+        newA = [[0 for i in range(self.N)] for i in range(self.N)]
+
+        for i in range(self.N):
+            for j in range(self.N):
+                num = 0
+                for t in range(len(O)):
+                    num += self.zeta(O, t, i, j)
+                num2 = 0
+                for t in range(len(O)):
+                    num2 += self.gamma(O, t, i)
+                newA[i][j] = num/num2
+
+        newB = [[0 for i in range(len(self.V))] for i in range(self.N)]
+
+        for i in range(self.N):
+            for k in range(self.N):
+                num = 0
+                for t in range(len(O)):
+                    if O[t] is self.V[k]:
+                        num += self.gamma(O, t, j)
+                num2 = 0
+                for t in range(len(O)):
+                    num2 += self.gamma(O, t, j)
+                newB[i][k] = num/num2
+
+        self.pi = newPi
+        self.A = newA
+        self.B = newB
+
+
+    def trainModel(self, O, epsilon):
         # O is the list of observations, with which we will adjust the
         # parameters of the model to maximize the probability that they
         # occur. You have to train the model, or else A, B, and pi won't
         # be set.
-        print "test"
+        done = False
+        while not done:
+            self.interateBaumWelch(O)
+            if abs(forwardBackwardProbability - self.probabilityOfObservation(O)) < epsilon:
+                done = True
+            forwardBackwardProbability = self.probabilityOfObservation(O)
+            print "fb: ", forwardBackwardProbability
+        print "done"
+
+
 
     # These setters are for debuging purposes
     def setA(self, A):
