@@ -34,5 +34,8 @@ for i in symbols:
 print "The sum is: "
 print sum
 
-testArray = ["A" for i in range(100)]
+testArray = ["A" for i in range(10)]
+#print hmm.beta(testArray, 1, 0)
+#print "beta done"
+#print hmm.alpha(testArray, len(testArray)-1, 0)
 hmm.trainModel(testArray, 0.002)

@@ -64,10 +64,10 @@ class HMM(object):
         return sumOfPathProbs * self.B[i][self.V.index(O[t])]
 
     def beta(self, O, t, i):
-        print "t: ", t, " h: ", i
+        #print "t: ", t, " h: ", i
         # backwards probability recursively defined
         if t is len(O)-1:
-            print "base case!"
+            #print "base case!"
             return 1
         sumOfPathProbs = 0
         for h in range(self.N):
@@ -85,9 +85,9 @@ class HMM(object):
 
     def zeta(self, O, t, i, j):
         num = 0
-        for i in range(self.N):
-            for j in range(self.N):
-                num += self.alpha(O, t, i) * self.A[i][j] * self.B[j][self.V.index(O[t+1])] * self.beta(O, t+1, j)
+        for a in range(self.N):
+            for b in range(self.N):
+                num += self.alpha(O, t, a) * self.A[a][b] * self.B[b][self.V.index(O[t+1])] * self.beta(O, t+1, b)
         return self.alpha(O, t, i) * self.A[i][j] * self.B[j][self.V.index(O[t+1])] * self.beta(O, t+1, j) / num
 
 
