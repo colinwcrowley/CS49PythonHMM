@@ -40,6 +40,7 @@ def summation(func, a, b):
         num += func(i)
     return num
 
+
 class HMM(object):
     def __init__(self, Q, V):
         self.Q = Q  # Q is the list of states
@@ -63,6 +64,25 @@ class HMM(object):
             sumOfPathProbs += self.alpha(O, t-1, h) * self.A[h][i]
         return sumOfPathProbs * self.B[i][self.V.index(O[t])]
 
+    def alphaDynamicSet(self, O):
+        self.alphaArray = [[0 for i in range(self.N)] for i in range(len(O))]
+        for i in range(self.N):
+            self.alphaArray[0][i] = self.pi[i] * self.B[i][self.V.index(O[0])]
+        for t in range(1, len(O)):
+            #print "setting row ", t, " in alpha"
+            for i in range(self.N):
+                sumOfPathProbs = 0
+                for h in range(self.N):
+                    sumOfPathProbs += self.alphaArray[t-1][h] * self.A[h][i]
+                self.alphaArray[t][i] = sumOfPathProbs * self.B[i][self.V.index(O[t])]
+                #print "sum of path probs", sumOfPathProbs
+                #print "B val: ", self.B[i][self.V.index(O[t])]
+                #print self.alphaArray
+
+
+    def alphaDynamicGet(self, t, i):
+        return self.alphaArray[t][i]
+
     def beta(self, O, t, i):
         #print "t: ", t, " h: ", i
         # backwards probability recursively defined
@@ -74,30 +94,61 @@ class HMM(object):
             sumOfPathProbs += self.A[i][h] * self.B[h][self.V.index(O[t+1])] * self.beta(O, t+1, h)
         return sumOfPathProbs
 
+    def betaDynamicSet(self, O):
+        self.betaArray = [[0 for i in range(self.N)] for i in range(len(O))]
+        for i in range(self.N):
+            self.betaArray[len(O)-1][i] = 1
+        for t in reversed(range(0, len(O)-1)):
+            for i in range(self.N):
+                sumOfPathProbs = 0
+                for h in range(self.N):
+                    sumOfPathProbs += self.A[i][h] * self.B[h][self.V.index(O[t+1])] * self.betaArray[t+1][h]
+                self.betaArray[t][i] = sumOfPathProbs
+
+    def betaDynamicGet(self, t, i):
+        return self.betaArray[t][i]
+
     def gamma(self, O, t, i):
         # probability that we are in some state at some time given an
         # odservation sequence
         probOfObservation = 0
         for h in range(self.N):
-            print "t: ", t, " h: ", h
-            probOfObservation += self.alpha(O, t, h) * self.beta(O, t, h)
-        return self.alpha(O, t, i) * self.beta(O, t, i) / probOfObservation
+            #print "t: ", t, " h: ", h
+            probOfObservation += self.alphaDynamicGet(t, h) * self.betaDynamicGet(t, h)
+        return self.alphaDynamicGet(t, i) * self.betaDynamicGet(t, i) / probOfObservation
+
+    def gammaDynamicSet(self, O):
+        # probability that we are in some state at some time given an
+        # odservation sequence
+        self.gammaArray = [[0 for i in range(self.N)] for t in range(len(O))]
+        for t in range(len(O)):
+            for i in range(self.N):
+                probOfObservation = 0
+                for h in range(self.N):
+                    probOfObservation += self.alphaDynamicGet(t, h) * self.betaDynamicGet(t, h)
+                self.gammaArray[t][i] = self.alphaDynamicGet(t, i) * self.betaDynamicGet(t, i) / probOfObservation
+
+    def gammaDynamicGet(self, t, i):
+        return self.gammaArray[t][i]
 
     def zeta(self, O, t, i, j):
+        #print "t=", t
+        #print "alpha=", self.alphaArray
         num = 0
         for a in range(self.N):
             for b in range(self.N):
-                num += self.alpha(O, t, a) * self.A[a][b] * self.B[b][self.V.index(O[t+1])] * self.beta(O, t+1, b)
-        return self.alpha(O, t, i) * self.A[i][j] * self.B[j][self.V.index(O[t+1])] * self.beta(O, t+1, j) / num
+                num += self.alphaDynamicGet(t, a) * self.A[a][b] * self.B[b][self.V.index(O[t+1])] * self.betaDynamicGet(t+1, b)
+        return self.alphaDynamicGet(t, i) * self.A[i][j] * self.B[j][self.V.index(O[t+1])] * self.betaDynamicGet(t+1, j) / num
 
 
     def probabilityOfObservation(self, O):
         # O is the list of observations (indecies), for which we will
         # return the probability that they occur.
         # one two three
+        self.alphaDynamicSet(O)
         prob = 0
         for i in range(self.N):
-            prob += self.alpha(O, len(O)-1, i)
+            prob += self.alphaDynamicGet(len(O)-1, i)
         return prob
 
     def mostLikelyStateSequence(self, O):
@@ -141,32 +192,32 @@ class HMM(object):
         return path
 
     def interateBaumWelch(self, O):
-        newPi = [self.gamma(O, 1, i) for i in range(self.N)]
+        newPi = [self.gammaDynamicGet(0, i) for i in range(self.N)]
 
         newA = [[0 for i in range(self.N)] for i in range(self.N)]
 
         for i in range(self.N):
             for j in range(self.N):
                 num = 0
-                for t in range(len(O)):
+                for t in range(len(O)-1):
                     num += self.zeta(O, t, i, j)
                 num2 = 0
-                for t in range(len(O)):
-                    num2 += self.gamma(O, t, i)
+                for t in range(len(O)-1):
+                    num2 += self.gammaDynamicGet(t, i)
                 newA[i][j] = num/num2
 
         newB = [[0 for i in range(len(self.V))] for i in range(self.N)]
 
-        for i in range(self.N):
-            for k in range(self.N):
+        for j in range(self.N):
+            for k in range(len(self.V)):
                 num = 0
                 for t in range(len(O)):
                     if O[t] is self.V[k]:
-                        num += self.gamma(O, t, j)
+                        num += self.gammaDynamicGet(t, j)
                 num2 = 0
                 for t in range(len(O)):
-                    num2 += self.gamma(O, t, j)
-                newB[i][k] = num/num2
+                    num2 += self.gammaDynamicGet(t, j)
+                newB[j][k] = num/num2
 
         self.pi = newPi
         self.A = newA
@@ -178,13 +229,19 @@ class HMM(object):
         # parameters of the model to maximize the probability that they
         # occur. You have to train the model, or else A, B, and pi won't
         # be set.
+        self.alphaDynamicSet(O)
+        self.betaDynamicSet(O)
+        self.gammaDynamicSet(O)
         done = False
+        forwardBackwardProbability = self.probabilityOfObservation(O)
+        print "Intitial fb: ", forwardBackwardProbability
         while not done:
             self.interateBaumWelch(O)
-            if abs(forwardBackwardProbability - self.probabilityOfObservation(O)) < epsilon:
+            if abs(forwardBackwardProbability - self.probabilityOfObservation(O)) / forwardBackwardProbability < epsilon:
                 done = True
             forwardBackwardProbability = self.probabilityOfObservation(O)
             print "fb: ", forwardBackwardProbability
+            #print "B val:", self.B
         print "done"
 
 
