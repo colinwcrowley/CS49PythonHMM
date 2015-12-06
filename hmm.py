@@ -132,12 +132,16 @@ class HMM(object):
         return self.gammaArray[t][i]
 
     def zeta(self, O, t, i, j):
+        self.alphaDynamicSet(O)
+        self.betaDynamicSet(O)
         #print "t=", t
         #print "alpha=", self.alphaArray
         num = 0
-        for a in range(self.N):
-            for b in range(self.N):
-                num += self.alphaDynamicGet(t, a) * self.A[a][b] * self.B[b][self.V.index(O[t+1])] * self.betaDynamicGet(t+1, b)
+        #for a in range(self.N):
+        #    for b in range(self.N):
+        #        num += self.alphaDynamicGet(t, a) * self.A[a][b] * self.B[b][self.V.index(O[t+1])] * self.betaDynamicGet(t+1, b)
+        for k in range(self.N):
+            num += self.alphaDynamicGet(len(O)-1, k)
         return self.alphaDynamicGet(t, i) * self.A[i][j] * self.B[j][self.V.index(O[t+1])] * self.betaDynamicGet(t+1, j) / num
 
 
@@ -242,9 +246,21 @@ class HMM(object):
             forwardBackwardProbability = self.probabilityOfObservation(O)
             print "fb: ", forwardBackwardProbability
             #print "B val:", self.B
-        print "done"
+        print "done with finding psudo-probabilities"
+        #Now just normalize each matrix
+        for i in range(self.N):
+            rowSum = 0
+            for j in range(self.N):
+                rowSum += self.A[i][j]
+            for j in range(self.N):
+                self.A[i][j] = self.A[i][j] / rowSum
 
-
+        for i in range(self.N):
+            rowSum = 0
+            for k in range(len(self.V)):
+                rowSum += self.B[i][k]
+            for k in range(len(self.V)):
+                self.B[i][k] = self.B[i][k] / rowSum
 
     # These setters are for debuging purposes
     def setA(self, A):

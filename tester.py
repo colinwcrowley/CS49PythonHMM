@@ -35,7 +35,7 @@ print "The sum is: "
 print sum
 
 #testArray = ["B" for i in range(10)]
-testArray = ["A", "B", "A", "C", "D", "F", "A", "A"]
+testArray = ["A", "B", "A", "C", "D", "F", "A", "A", "A", "A", "B", "F", "F", "F", "F", "F", "F"]
 hmm.alphaDynamicSet(testArray)
 hmm.betaDynamicSet(testArray)
 
@@ -45,3 +45,6 @@ hmm.betaDynamicSet(testArray)
 hmm.trainModel(testArray, 0.00000000002)
 print "A: ", hmm.A
 print "B: ", hmm.B
+print "Pi: ", hmm.pi
+
+# Example model for internet
