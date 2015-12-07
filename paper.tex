@@ -14,6 +14,10 @@
 
 % definitely use fullpage package
 \usepackage{fullpage}
+\usepackage{amsmath,amsthm,amssymb,amsfonts}
+\usepackage{tikz}
+\usetikzlibrary{arrows}
+\usetikzlibrary{positioning,automata}
 
 \newcommand{\Tau}{\mathrm{T}}
 
@@ -45,6 +49,9 @@
 % The abstract is a 1-2 paragraph synopsis of your project and
 %  what you accomplished.
 \begin{abstract}
+Hidden Markov Models (HMMs) are an indespensable tool for modeling and predicting myriad probabilistic processes. Hidden Markov Models involve a chain of state changes and observable emissions at each discrete timestep which are independent of previous timesteps. Because of this independence of events, probabilistic analyses allow us to study many complex systems (or at least approximations of complex systems) in polynomial time.
+
+When using an HMM as a model, there are many values one would like to calculate, or at least estimate. Here, we provide algorithms and analysis for three of the most useful algorithms pertaining to HMMs. The forward-backward calculates the probability distributions of seeing the possible observations at any particular timestep, and the Viterbi algorithm calculates the most likely sequence of observations. Both of these algorithms rely on knowing the model parameters, which cannot always be assumed. For this reason, the Baum-Welch Algorithm was developed to estimate model parameters within an arbitrary degree of accuracy.
 \end{abstract}
 
 % I like to keep each section of a paper in a different .tex file,
@@ -52,8 +59,8 @@
 % The \input command essentially cut'n'pastes content from e.g.
 %  intro.tex into this .tex file
 
-%\input{intro}
-\input{analysis.tex}
+\input{intro}
+%\input{analysis.tex}
 %\input{prelim}
 %\input{firstresult}
 %\input{secondresult}
