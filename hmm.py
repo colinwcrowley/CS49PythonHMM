@@ -227,6 +227,20 @@ class HMM(object):
         self.A = newA
         self.B = newB
 
+        #Now just normalize each matrix
+        for i in range(self.N):
+            rowSum = 0
+            for j in range(self.N):
+                rowSum += self.A[i][j]
+            for j in range(self.N):
+                self.A[i][j] = self.A[i][j] / rowSum
+
+        for i in range(self.N):
+            rowSum = 0
+            for k in range(len(self.V)):
+                rowSum += self.B[i][k]
+            for k in range(len(self.V)):
+                self.B[i][k] = self.B[i][k] / rowSum
 
     def trainModel(self, O, epsilon):
         # O is the list of observations, with which we will adjust the
@@ -246,21 +260,7 @@ class HMM(object):
             forwardBackwardProbability = self.probabilityOfObservation(O)
             print "fb: ", forwardBackwardProbability
             #print "B val:", self.B
-        print "done with finding psudo-probabilities"
-        #Now just normalize each matrix
-        for i in range(self.N):
-            rowSum = 0
-            for j in range(self.N):
-                rowSum += self.A[i][j]
-            for j in range(self.N):
-                self.A[i][j] = self.A[i][j] / rowSum
-
-        for i in range(self.N):
-            rowSum = 0
-            for k in range(len(self.V)):
-                rowSum += self.B[i][k]
-            for k in range(len(self.V)):
-                self.B[i][k] = self.B[i][k] / rowSum
+        print "done"
 
     # These setters are for debuging purposes
     def setA(self, A):

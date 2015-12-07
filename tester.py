@@ -34,7 +34,7 @@ for i in symbols:
 print "The sum is: "
 print sum
 
-#testArray = ["B" for i in range(10)]
+#testArray = ["B" for i in range(100)]
 testArray = ["A", "B", "A", "C", "D", "F", "A", "A", "A", "A", "B", "F", "F", "F", "F", "F", "F"]
 hmm.alphaDynamicSet(testArray)
 hmm.betaDynamicSet(testArray)
@@ -42,7 +42,7 @@ hmm.betaDynamicSet(testArray)
 #print hmm.beta(testArray, 1, 0)
 #print "beta done"
 #print hmm.alpha(testArray, len(testArray)-1, 0)
-hmm.trainModel(testArray, 0.00000000002)
+hmm.trainModel(testArray, 0.002)
 print "A: ", hmm.A
 print "B: ", hmm.B
 print "Pi: ", hmm.pi
