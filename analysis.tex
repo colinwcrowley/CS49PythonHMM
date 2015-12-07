@@ -1,0 +1,338 @@
+%Don't forget to fill in dummy citations!!
+
+\section{Analysis of Algorithms}
+\subsection{Notation}
+
+We will begin by defining the notation used to analyze Hidden Markov
+Models. The set of states within the model is denoted as
+
+\begin{equation}
+  S = \{S_1, S_2, \ldots, S_N \}
+\end{equation}
+
+where $N$ is the number of states. The symbols of the model are likewise
+denoted as
+
+\begin{equation}
+  V = \{V_1, V_2, \ldots, V_M \}
+\end{equation}
+
+where $M$ is the number of symbols. The current time is denoted $t$
+which ranges from $t=1, \ldots, \Tau$, and the state at the current
+time is denoted $q_t$. We need a separate letter for the state at the
+current time because the letter $S$ is indexed as a list of different
+states and we want $q$ to mean the \emph{sequence of states over time}.
+Next we will define the two matrices that form the core of the model.
+The first matrix defines that probability that the next state will be
+$S_j$ given that the current state is $S_i$, and is denoted
+
+\begin{equation}
+  A = \{a_{ij}\}, \quad a_{ij} = \Pr[q_{t+1} = S_j \vert q_{t} = S_i],
+  \quad 1 \leq i,j \leq N
+\end{equation}
+
+The next matrix is the sets the probability that a particular symbol
+will be observed given that the model is in the state $S_i$, and is
+written
+
+\begin{equation}
+  B = \{b_j(k)\}, \quad b_j(k) = \Pr[v_k\ \textrm{is observed at time}\ t
+  \vert q_t = S_j], \quad 1 \leq j \leq N, \quad 1 \leq k \leq M
+\end{equation}
+
+While it computationally more convenient to conceptualize $B$ as a
+matrix, we can also think of it as a probability distribution of $V$
+over $S$. That is the reason why $b_j(k)$ is written as a function instead of
+with subscripts like $a_{ij}$. Hidden Markov Models, instead of having a
+starting state, have an initial probability distribution over $S$. This
+distribution is denoted $\pi$.
+
+\begin{equation}
+  \pi_i = \Pr[q_1 = S_i], \quad 1 \leq i \leq N
+\end{equation}
+
+Finally, we have a list of observation that is denoted
+
+\begin{equation}
+  O = O_1\ O_2\ \ldots\ \ O_\Tau
+\end{equation}
+
+We will often begin with a list of observations $O$ and the goal will be
+to compute other parameters of the model. For example, in the Viterbi
+algorithm we are given $O$ and compute the most likely sequence of
+states $q_1,\ \ldots,\ q_\Tau$. Therefore, it is helpful to
+conceptualize $O$ as the ``input'' and the underlying states or the
+optimal model as the ``goal.''
+
+\subsection{Forwards Backwards}
+
+The goal of the Forwards Backwards algorithm, and the first obvious goal
+of a Hidden Markov Model, is finding the likelihood that a sequence of
+observations will happen. When thinking procedurally it is helpful to think of $O$ as our input,
+the rest of the model as the information we can access, and the
+probability of $O$ as the output. In notational terms, we are looking for $\Pr[O
+\vert \lambda]$ where $\lambda$ are the parameters of the model $\lambda
+= (A, B, \pi)$. (We will often need to find probabilities that are
+conditional on $A$, $B$, and $\pi$, so we will use $\lambda$ for ease of
+notation.) The forwards-backwards algorithm works by recursively finding
+the probabilities of a partial series of observations. Let the ``forward
+probability'' be the following.
+
+\begin{equation}
+\alpha_t(i) = \Pr[O_1\ O_2\ \ldots\ O_t\ \textrm{is observed \emph{and}}\ q_t = S_i \vert \lambda]
+\end{equation}
+
+The letter $\alpha$ is the probability that the first $t$ elements
+of $O$ are observed and the state at the end of that partial observation
+is $S_i$. The probability $\Pr[O \vert \lambda]$ which we are
+looking for can be expressed as the following sum.
+
+\begin{equation}
+  \Pr[O \vert \lambda] = \sum_{i=1}^N \alpha_\Tau(i)
+\end{equation}
+
+Remember that $\Tau$ is the time of the last observation. Let us prove
+this by using the definition of $\alpha$ and the Markov property, which
+tells us that the next state.
+
+\begin{proof}
+  We have the sum
+  \begin{align*}
+    \sum_{i=1}^N \alpha_t(i) &= \sum_{i=1}^N \Pr[O\ \cap\ q_t = S_i \vert \lambda]\\
+    \intertext{where $O = O_1\ O_2\ \ldots\ O_\Tau$. Rewriting in terms of conditional probability gives us}
+    &= \sum_{i=1}^N \Pr[O\ \vert \lambda] \Pr[q_\Tau = S_i \vert O,\lambda]
+    \intertext{Because the first probability within sigma does not vary
+    with $i$, we can pull it outside to get}
+    &=  \Pr[O\ \vert \lambda] \sum_{i=1}^N \Pr[q_\Tau = S_i \vert O,\lambda]
+    \intertext{Because the model can not be in more than one state at
+    any one time, the events that $q_\Tau = S_i$ given that $O,\lambda$
+    happened for $1 \leq i \leq N$ are independent. And so the sum of
+    their probabilities is equal to the probability of their union.
+    Furthermore, because the model must be in some state at any one
+    time, the probability of their union is equal to 1. Thus we have}
+    &= \Pr[O\ \vert \lambda]
+  \end{align*}
+\end{proof}
+
+We can now use alpha to output the probability $\Pr[O\ \vert \lambda]$,
+but the reason that this approach is useful is because $\alpha$ has a recursive
+definition that leads to an efficient calculation of that probability.
+Specifically, we can define alpha as follows.
+
+\begin{equation}
+  \alpha_1(i) = \pi_i b_i(O_1)\\
+\end{equation}
+
+\begin{proof}
+  \begin{align*}
+    \alpha_1(i) &= \Pr[O_1\ \cap\ q_1=S_i]\\
+    \intertext{These events are independent, so}
+    &= \Pr[O_1] \Pr[q_1=S_i]\\
+    &= \pi_1 b_i(O_1)\\
+  \end{align*}
+\end{proof}
+
+Let $t=1$ be the base case. For the recursive step, we can define
+$\alpha_t(i)$ as
+
+\begin{equation}
+  \alpha_t(j) = \left( \sum_{i=1}^N \alpha_{t-1}(i) a_{ij} \right)
+  b_t(O_j)
+\end{equation}
+
+\begin{proof}
+  \begin{align*}
+    \alpha_t(j) &= \Pr[O_t\ \cap\ q_t=S_j]\\
+                &= \Pr[O_1\ O_2\ \ldots\ O_{t-1}\ \cap q_t=S_j \cap O_t]\\
+                &= \Pr[O_1\ O_2\ \ldots\ O_{t-1} \cap q_t=S_j]  \Pr[O_t \vert q_t=S_j,\ O_1\ O_2\ \ldots\ O_{t-1}]\\
+                &= \Pr[O_1\ O_2\ \ldots\ O_{t-1} \cap q_t=S_j] b_j(O_t)\\
+                &= \Pr[O_1\ O_2\ \ldots\ O_{t-1} \cap q_t=S_j] b_j(O_t)\\
+    \intertext{The probability in the equation directly above can be
+    expressed as the probability that the first $t-1$ observations were
+    made which is $\sum_{i=1}^N \alpha_{t-1}(i)$ times the probability
+    that whatever state $\alpha_{t-1}$ leaves us in will transition to
+    $S_i$ which is $a_{ij}$. Since these two are independent, they can
+    both be expressed as a product in the following equation.}
+                &= \left( \sum_{i=1}^N \alpha_{t-1}(i) a_{ij} \right) b_t(O_j)
+  \end{align*}
+\end{proof}
+
+This recursive definition allows us to make a two dimensional array of
+values for alpha across $t$ and $i$, and fill it in with one pass using
+dynamic programming. The algorithm works as follows.
+\begin{enumerate}[1)]
+    \item Initialize a two dimensional array with columns that represent
+      $i$ (the possible states) and rows that represent $t$ (the time).
+    \item Loop through the first row and initialize it with $\pi_i b_i(O_1)$
+    \item Have an outer loop through the rows (besides the first one)
+      and an inner loop through the columns. Set each entry to
+      $\alpha_t(j) = \left( \sum_{i=1}^N \alpha_{t-1}(i) a_{ij} \right)
+      b_t(O_j)$
+\end{enumerate}
+
+This algorithm requires $N^2\Tau$ steps: $N\Tau$ steps for each entry in the
+array, and while filling each entry, there are $N$ steps to compute the
+sum that it involves. This $O(N^2\Tau)$ runtime algorithm is quite
+efficient when compared with the naive approach. (CITATION)
+
+Let us now define the ``Backwards Probability.''
+
+\begin{equation}
+  \beta_t(i) = \Pr[O_{t+1}\ O_{t+2}\ \ldots\ O_\Tau \vert q_t = S_i,
+  \lambda]
+\end{equation}
+
+That the $q_t = S_i$ event is a condition in the backwards probability
+will make calculations later on easier. We can define $\beta$ in a
+similar way to $\alpha$, and the probability returned by forwards
+backwards can also be found with $\beta$, but because we already have a way
+to do it with $\alpha$, we won't prove the properties of $\beta$ in as
+much detail. Beta will be used as a tool to derive other probabilities.
+It can be calculated using a similar recursive definition to $\alpha$.
+
+\begin{equation}
+  \beta_\Tau(i) = 1\\
+\end{equation}
+\begin{equation}
+  \beta_t(i) = \sum_{j=1}^N a_{ij} b_j(O_t+1) \beta_{t+1}(j)
+\end{equation}
+
+One can follow a slightly modified version of the above algorithm for
+finding $\alpha$ and get a $O(N^2\Tau)$ runtime algorithm for finding
+$\beta$ as well.
+
+\subsection{Viterbi Algorithm}
+
+The aim of this algorithm is to find the sequence of states that
+maximizes the likelihood of the inputed sequence of observations being
+observed. Let's define the probability $\delta$ as follows.
+
+\begin{equation}
+  \delta_1(i) = \pi_i b_i(O_1)\\
+\end{equation}
+
+\begin{equation}
+  \delta_t(j) = \max_i[\delta_{t-1}(i)\ a_{ij}\ ] b_j(O_t)
+\end{equation}
+
+Note that delta is identical to $\alpha$ except in the recursive
+definition, instead of summing over the previous calls, $\delta$ maximizes
+over them. While summing gave the total probability that we observe the
+partial sequence of events and end up in state $S_i$ at time $t$,
+maximizing gives the maximum probability for a single sequence of
+states that we get the sequence of observations and end up in state
+$S_i$ at time $t$. In formal notation
+
+\begin{equation}
+  \delta_t(i) = \max_{q_1,\ q_2,\ \ldots\ q_{t-1}} \Pr[O_1\ O_2\ \ldots\
+  O_t\ \cap q_t = S_i \cap q_1,\ q_2,\ \ldots\ q_{t-1}]
+\end{equation}
+
+While summing up $\alpha_\Tau$ over $i$ gave the total probability of the
+observation, maximizing $\delta_\Tau$ over $i$ gives the probability of
+the observation with the optimal state sequence. (CITATION)
+
+\begin{equation}
+  \max_i[\delta_\Tau(i)]
+\end{equation}
+
+We can now follow the same dynamic programming algorithm for $\alpha$ to
+find the probability that comes from the optimal state sequence,
+however, we will also need to keep track of the state sequence at each
+point to be able to recover it in the end. The following algorithm does
+this with two two dimensional arrays.
+
+\begin{enumerate}
+    \item Make two 2-Dimensional arrays with columns that
+      represent $i$ (the state) and rows that represent $t$ (the time).
+      Call one \emph{delta} and call one \emph{psi}.
+    \item Initialize the first row of delta with $\pi_i b_i(O_1)$.
+    \item Have an outer loop through the rows (besides the first one)
+      and an inner loop through the columns. Set \emph{delta}$[t][i] =
+      \max_k[\delta_{t-1}(k)\ a_{ki}\ ] b_i(O_t)$. Set \emph{psi}$[t][i]
+      = \argmax_k[\delta_{t-1}(k)\ a_{ki}\ ]$
+    \item Now pick the best path ending by selecting \emph{path}$[\Tau] =
+      \argmax_k[\textrm{\emph{delta}}[\Tau][k]]$. And follow that path
+      backwards to create \emph{path}$[t] =
+      $\emph{psi}$[$\emph{path}$[t+1]]$
+\end{enumerate}
+
+ADD SOME MORE HERE-----------------------------------------
+
+\subsection{Baum-Welch Algorithm}
+
+This algorithm finds the $\alpha$, $\beta$, and $\pi$ that predict a
+given sequence of events with the locally maximal probability. There is
+no know way to find the globally maximal probability. (CITATION) This is
+essentially how one can train a hidden Markov Model with observed data.
+
+The Baum-Welch Algorithm uses two probability functions other than
+$\alpha$ and $\beta$ that we will define first. The function
+$\gamma_t(i)$ is the probability that the model is in state $S_i$ at
+time $t$ and is written formally as
+
+\begin{equation}
+  \gamma_t(i) = \Pr[q_t = S_i \vert O, \lambda]
+\end{equation}
+
+The function $\gamma_t(i)$ can be calculated by finding the probability
+of the observation and that $q_t = S_i$ and dividing it by the
+probability that the observation happens. We can there for express it as
+
+\begin{equation}
+  \gamma_t(i) = \frac{\alpha_t(i)\beta_t(i)}{\sum_{k=1}^N
+  \alpha_\Tau(k)}
+\end{equation}
+
+It is easy to reason that this is the correct expression because
+\begin{align*}
+  \alpha_t(i) \beta_t(i) &= \Pr[O_1\ O_2\ \ldots\ O_t \cap q_t = S_i \vert
+  \lambda] \Pr[O_1\ O_2\ \ldots\ O_t \vert q_t = S_i, \lambda]\\
+    &= \Pr[O_1\ O_2\ \ldots\ O_\Tau \cap q_t = S_i \vert \lambda]
+  \intertext{and}
+  \sum_{k=1}^N \alpha_\Tau(k) &= \Pr[O \vert \lambda]
+\end{align*}
+
+The second probability function that we will need is $\xi_t(i,j)$,
+which is the probability that $q_t = S_i$ and $q_{t+1} = S_j$ given the
+observations and the model. This probability of a transition will,
+naturally, be helpful when computing the optimal transition matrix.
+
+\begin{equation}
+  \xi_t(i,j) = \Pr[q_t = S_i \cap q_{t+1} = S_j \vert O,\lambda]
+\end{equation}
+
+We can use the same logic as we did for $\gamma$, only this time also
+factoring in the probability that $q_{t+1} = S_j$ with the following
+equation.
+
+\begin{equation}
+  \xi_t(i,j) = \frac{\alpha_t(i)\ a_{ij}\ b_j(O_{t+1})\
+  \beta_{t+1}(j)}{\sum_{k=1}^N \alpha_\Tau(k)}
+\end{equation}
+
+The Baum-Welch algorithm uses expected values of transitions and
+emissions found from the current parameters to find better parameters.
+Specifically the following. (CITATION)
+
+\begin{equation}
+  \pi_i = \Pr[q_1 = S_i \vert O,\lambda] = \gamma_1(i)
+\end{equation}
+
+\begin{equation}
+  a_{ij} = \frac{\E[\textrm{number of transitions from $S_i$ to
+  $S_t$}]}{\E[\textrm{number of transitions from $S_i$}]} =
+  \frac{\sum_{t=1}^{N-1} \xi_t(i,j)}{\sum_{t=1}^{N-1} \gamma_t(i)}
+\end{equation}
+
+\begin{equation}
+  b_i(k) = \frac{\E[\textrm{number of times in state $i$ and emitting symbol
+  $k$}]}{\E[\textrm{number of times in state $i$}]} = \frac{\sum_{t\ \textrm{s.t.} O_t = v_k} \gamma_t(i)}{\sum_{t=1}^N \gamma_t(i)}
+\end{equation}
+
+Each one of these calculation finds the values of the parameters
+\emph{conditioned on the observation and the current parameters}. This
+is clear to see with $\pi$ as it is in the equation, but it is also true
+of $A$ and $B$ because, remember, both $\gamma$ and $\xi$ are
+conditional on $O$ and $\lambda$. With these new parameters, which
+improve the likelihood of observing $O$, we can repeat this process.
