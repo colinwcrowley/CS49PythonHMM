@@ -8,7 +8,6 @@
 % > pdflatex sample-paper
 % > pdflatex sample-paper
 
-
 % definitely use the article class and 11 pt font.
 \documentclass[11pt]{article}
 
@@ -19,8 +18,12 @@
 \usetikzlibrary{arrows}
 \usetikzlibrary{positioning,automata}
 
-\newcommand{\Tau}{\mathrm{T}}
+\usepackage{mathtools,textcomp,enumerate}
+\DeclareMathOperator*{\argmax}{\arg\!\max}
 
+
+\newcommand{\Tau}{\mathrm{T}}
+\newcommand{\E}{\mathrm{E}}
 % Include optional other packages here.
 
 % If you have lots of macros and other new command definitions
