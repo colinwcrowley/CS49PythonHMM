@@ -257,13 +257,17 @@ this with two two dimensional arrays.
       $\emph{psi}$[$\emph{path}$[t+1]]$
 \end{enumerate}
 
-ADD SOME MORE HERE-----------------------------------------
+The $t$'th $i$'th entry of \emph{delta} is equal to $\delta_t(i)$.
+The $t$'th $i$'th entry of \emph{psi} is equal to the state at $t-1$
+that maximized $\delta_t(i)$. The last step in the algorithm above
+simply finds the state at $\Tau$ with the highest ``score'' and then finds
+the state at $\Tau - 1$ that precedes it in the path that gives it that
+``score'', and finds the state that precedes that, and so on.
 
 \subsection{Baum-Welch Algorithm}
 
 This algorithm finds the $\alpha$, $\beta$, and $\pi$ that predict a
-given sequence of events with the locally maximal probability. There is
-no know way to find the globally maximal probability. (CITATION) This is
+given sequence of events with the locally maximal probability. This is
 essentially how one can train a hidden Markov Model with observed data.
 
 The Baum-Welch Algorithm uses two probability functions other than
@@ -330,9 +334,23 @@ Specifically the following. (CITATION)
   $k$}]}{\E[\textrm{number of times in state $i$}]} = \frac{\sum_{t\ \textrm{s.t.} O_t = v_k} \gamma_t(i)}{\sum_{t=1}^N \gamma_t(i)}
 \end{equation}
 
+The procedural algorithm for finding each of the new parameters is easy
+to implement by simply computing them with the equations given above.
+
 Each one of these calculation finds the values of the parameters
-\emph{conditioned on the observation and the current parameters}. This
-is clear to see with $\pi$ as it is in the equation, but it is also true
-of $A$ and $B$ because, remember, both $\gamma$ and $\xi$ are
-conditional on $O$ and $\lambda$. With these new parameters, which
-improve the likelihood of observing $O$, we can repeat this process.
+\emph{conditioned on the observation and the current parameters}.
+This is clear to see with $\pi$ as it is in the equation, but it is
+also true of $A$ and $B$ because, remember, both $\gamma$ and $\xi$
+are conditional on $O$ and $\lambda$. This process uses the current
+estimates to improve the current estimates. To reach a local maximum,
+we can simply do this repeatedly. When the process no longer results in
+a higher probability of observing $O$, than the algorithm terminates.
+Note, however, that we do need starting parameters. Two different
+starting parameters can yield two different final parameters. Each final
+set of parameters will be a local maximum, but one my give a higher
+probability of $O$ than the other. There are many interesting techniques
+for finding the initial parameters that lead to the \emph{global
+maximum}, which include genetic algorithms and particle swarm
+algorithms. (CITATION)
+%Cite ``Investigation of Training Algorithms for Hidden Markov Models
+%Applied to ...'' page 17

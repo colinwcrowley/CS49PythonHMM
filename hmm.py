@@ -65,29 +65,25 @@ class HMM(object):
         return sumOfPathProbs * self.B[i][self.V.index(O[t])]
 
     def alphaDynamicSet(self, O):
+        # Use dynamic programing to make a table at the begining and
+        # reference it in the following calculations.
         self.alphaArray = [[0 for i in range(self.N)] for i in range(len(O))]
         for i in range(self.N):
             self.alphaArray[0][i] = self.pi[i] * self.B[i][self.V.index(O[0])]
         for t in range(1, len(O)):
-            #print "setting row ", t, " in alpha"
             for i in range(self.N):
                 sumOfPathProbs = 0
                 for h in range(self.N):
                     sumOfPathProbs += self.alphaArray[t-1][h] * self.A[h][i]
                 self.alphaArray[t][i] = sumOfPathProbs * self.B[i][self.V.index(O[t])]
-                #print "sum of path probs", sumOfPathProbs
-                #print "B val: ", self.B[i][self.V.index(O[t])]
-                #print self.alphaArray
 
 
     def alphaDynamicGet(self, t, i):
         return self.alphaArray[t][i]
 
     def beta(self, O, t, i):
-        #print "t: ", t, " h: ", i
         # backwards probability recursively defined
         if t is len(O)-1:
-            #print "base case!"
             return 1
         sumOfPathProbs = 0
         for h in range(self.N):
@@ -95,6 +91,8 @@ class HMM(object):
         return sumOfPathProbs
 
     def betaDynamicSet(self, O):
+        # Use dynamic programing to make a table at the begining and
+        # reference it in the following calculations.
         self.betaArray = [[0 for i in range(self.N)] for i in range(len(O))]
         for i in range(self.N):
             self.betaArray[len(O)-1][i] = 1
@@ -113,11 +111,13 @@ class HMM(object):
         # odservation sequence
         probOfObservation = 0
         for h in range(self.N):
-            #print "t: ", t, " h: ", h
             probOfObservation += self.alphaDynamicGet(t, h) * self.betaDynamicGet(t, h)
         return self.alphaDynamicGet(t, i) * self.betaDynamicGet(t, i) / probOfObservation
 
     def gammaDynamicSet(self, O):
+        # Use dynamic programing to make a table at the begining and
+        # reference it in the following calculations.
+
         # probability that we are in some state at some time given an
         # odservation sequence
         self.gammaArray = [[0 for i in range(self.N)] for t in range(len(O))]
@@ -134,8 +134,6 @@ class HMM(object):
     def zeta(self, O, t, i, j):
         self.alphaDynamicSet(O)
         self.betaDynamicSet(O)
-        #print "t=", t
-        #print "alpha=", self.alphaArray
         num = 0
         #for a in range(self.N):
         #    for b in range(self.N):
@@ -169,7 +167,6 @@ class HMM(object):
         for i in range(self.N):
             delta[0][i] = self.pi[i] * self.B[i][self.V.index(O[1])]
 
-        print " -> delta array after initialization:", delta
 
         for t in range(1, len(O)):
             for i in range(self.N):
@@ -177,7 +174,6 @@ class HMM(object):
                 delta[t][i] = maximum(lam, 0, self.N) * self.B[i][self.V.index(O[t])]
                 psi[t][i] = argmax(lam, 0, self.N)
 
-        print " -> finished delta array:", delta
 
         # Now that we've covered all of the possibilities, let's choose
         # the best one.
