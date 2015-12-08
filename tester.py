@@ -1,4 +1,4 @@
-# I want an example to work with as we build this thing, and we can use
+# We want an example to work with as we build this thing, and we can't use
 # the weather example because that was for plain old Markov chain. So I
 # feel like a better example would be the mood of some professor and the
 # grade the the grade that she give. (i.e. when arngy she gives lower
@@ -65,7 +65,7 @@ print "A = ", hmm2.A
 print "B = ", hmm2.B
 print "Pi = ", hmm2.pi
 
-# For this final test we will set the model with uniformly parameters
+# For this final test we will set the model with uniform parameters
 # for A, B, and Pi, and train it with a uniformly random observation. If
 # it works correctly, there should be little change because the model is
 # already at a global maximum. (There my be some overfitting to the
@@ -100,6 +100,8 @@ viterbiArray2 = ["F", "F", "F", "F"]
 print "Forwards-Backards of hmm3: ", hmm3.probabilityOfObservation(viterbiArray1), " should equal ON AVERAGE ", hmm3.probabilityOfObservation(viterbiArray2)
 
 #Run this a few times to see that they are indeed equal on average.
+#Because the Baum-Welch algorithm used the forwards-backwards algorithm,
+#we have in a way, already tested it significantly.
 
 # To test the Viterbi algorithm, we should first get the most likely
 # sequence of happy, happy, happy, from giving hmm2 ["A", "A", "A" ]
@@ -111,3 +113,5 @@ print "Most likely to give A, A, A, in hmm2: ", hmm2.mostLikelyStateSequence(["A
 # so the best way to get the most F's is to progress to angry
 
 print "Most likely to give F, F, F, in hmm2: ", hmm2.mostLikelyStateSequence(["F", "F", "F"])
+
+# We know that you would never be this baised when grading!

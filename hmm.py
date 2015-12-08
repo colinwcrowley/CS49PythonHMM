@@ -1,5 +1,5 @@
 # Note that the class does not generate outcomes, but rather tells you
-# the likely hood of given outcomes. I though this was a reasonable
+# the likely hood of given outcomes. We though this was a reasonable
 # implementation choice since we are only interested in EXPLAINGING an
 # observation sequence. We aren't trying to generate one.
 
@@ -24,21 +24,6 @@ def argmax(func, a, b):
             num = cur
             index = i
     return index
-
-
-def doubleSummation(func, a, b, x, y):
-    num = 0
-    for i in range(a, b):
-        for j in range(x, y):
-            num += func(i, j)
-    return num
-
-
-def summation(func, a, b):
-    num = 0
-    for i in range(a, b):
-        num += func(i)
-    return num
 
 
 class HMM(object):
@@ -258,7 +243,6 @@ class HMM(object):
             #print "B val:", self.B
         print "done"
 
-    # These setters are for debuging purposes
     def setA(self, A):
         self.A = A
 

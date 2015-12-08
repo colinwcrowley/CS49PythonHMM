@@ -22,34 +22,6 @@ which ranges from $t=1, \ldots, \Tau$, and the state at the current
 time is denoted $q_t$. We need a separate letter for the state at the
 current time because the letter $S$ is indexed as a list of different
 states and we want $q$ to mean the \emph{sequence of states over time}.
-Next we will define the two matrices that form the core of the model.
-The first matrix defines that probability that the next state will be
-$S_j$ given that the current state is $S_i$, and is denoted
-
-\begin{equation}
-  A = \{a_{ij}\}, \quad a_{ij} = \Pr[q_{t+1} = S_j \vert q_{t} = S_i],
-  \quad 1 \leq i,j \leq N
-\end{equation}
-
-The next matrix is the sets the probability that a particular symbol
-will be observed given that the model is in the state $S_i$, and is
-written
-
-\begin{equation}
-  B = \{b_j(k)\}, \quad b_j(k) = \Pr[v_k\ \textrm{is observed at time}\ t
-  \vert q_t = S_j], \quad 1 \leq j \leq N, \quad 1 \leq k \leq M
-\end{equation}
-
-While it computationally more convenient to conceptualize $B$ as a
-matrix, we can also think of it as a probability distribution of $V$
-over $S$. That is the reason why $b_j(k)$ is written as a function instead of
-with subscripts like $a_{ij}$. Hidden Markov Models, instead of having a
-starting state, have an initial probability distribution over $S$. This
-distribution is denoted $\pi$.
-
-\begin{equation}
-  \pi_i = \Pr[q_1 = S_i], \quad 1 \leq i \leq N
-\end{equation}
 
 Finally, we have a list of observations denoted
 
@@ -91,9 +63,7 @@ looking for can be expressed as the following sum.
   \Pr[O \vert \lambda] = \sum_{i=1}^N \alpha_\Tau(i)
 \end{equation}
 
-Remember that $\Tau$ is the time of the last observation. Let us prove
-this by using the definition of $\alpha$ and the Markov property, which
-tells us that the next state.
+Remember that $\Tau$ is the time of the last observation.
 
 \begin{proof}
   We have the sum
@@ -145,7 +115,6 @@ $\alpha_t(i)$ as
     \alpha_t(j) &= \Pr[O_t\ \cap\ q_t=S_j]\\
                 &= \Pr[O_1\ O_2\ \ldots\ O_{t-1}\ \cap q_t=S_j \cap O_t]\\
                 &= \Pr[O_1\ O_2\ \ldots\ O_{t-1} \cap q_t=S_j]  \Pr[O_t \vert q_t=S_j,\ O_1\ O_2\ \ldots\ O_{t-1}]\\
-                &= \Pr[O_1\ O_2\ \ldots\ O_{t-1} \cap q_t=S_j] b_j(O_t)\\
                 &= \Pr[O_1\ O_2\ \ldots\ O_{t-1} \cap q_t=S_j] b_j(O_t)\\
     \intertext{The probability in the equation directly above can be
     expressed as the probability that the first $t-1$ observations were
@@ -219,7 +188,7 @@ Note that $\delta$ is identical to $\alpha$ except in the recursive
 definition, instead of summing over the previous calls, $\delta$ maximizes
 over them. While summing gave the total probability that we observe the
 partial sequence of events and end up in state $S_i$ at time $t$,
-maximizing gives the maximum probability for a single sequence of
+maximizing gives the maximum probability for a \emph{single sequence} of
 states that we get the sequence of observations and end up in state
 $S_i$ at time $t$. In formal notation
 
@@ -230,17 +199,17 @@ $S_i$ at time $t$. In formal notation
 
 While summing up $\alpha_\Tau$ over $i$ gave the total probability of the
 observation, maximizing $\delta_\Tau$ over $i$ gives the probability of
-the observation with the optimal state sequence. (CITATION)
+the observation with the optimal state sequence. \cite{Rabiner89}
 
 \begin{equation}
   \max_i[\delta_\Tau(i)]
 \end{equation}
 
-We can now follow the same dynamic programming algorithm for $\alpha$ to
+We can now follow a similar dynamic programming algorithm for $\alpha$ to
 find the probability that comes from the optimal state sequence,
 however, we will also need to keep track of the state sequence at each
 point to be able to recover it in the end. The following algorithm does
-this with two two dimensional arrays.
+this with two 2-dimensional arrays.
 
 \begin{enumerate}
     \item Make two 2-Dimensional arrays with columns that
@@ -266,7 +235,7 @@ the state at $\Tau - 1$ that precedes it in the path that gives it that
 
 \subsection{Baum-Welch Algorithm}
 
-This algorithm finds the $\alpha$, $\beta$, and $\pi$ that predict a
+This algorithm finds the $A$, $B$, and $\pi$ that predict a
 given sequence of events with the locally maximal probability. This is
 essentially how one can train a hidden Markov Model with observed data.
 
@@ -281,7 +250,7 @@ time $t$ and is written formally as
 
 The function $\gamma_t(i)$ can be calculated by finding the probability
 of the observation and that $q_t = S_i$ and dividing it by the
-probability that the observation happens. We can there for express it as
+probability of the observation. We can therefore express it as
 
 \begin{equation}
   \gamma_t(i) = \frac{\alpha_t(i)\beta_t(i)}{\sum_{k=1}^N
@@ -317,7 +286,7 @@ equation.
 
 The Baum-Welch algorithm uses expected values of transitions and
 emissions found from the current parameters to find better parameters.
-Specifically the following. (CITATION)
+Specifically the following. \cite{Rabiner89}
 
 \begin{equation}
   \pi_i = \Pr[q_1 = S_i \vert O,\lambda] = \gamma_1(i)
@@ -346,10 +315,10 @@ estimates to improve the current estimates. To reach a local maximum,
 we can simply do this repeatedly. When the process no longer results in
 a higher probability of observing $O$, than the algorithm terminates.
 Note, however, that we do need starting parameters. Two different
-starting parameters can yield two different final parameters. Each final
+starting sets of parameters can yield two different final sets of parameters. Each final
 set of parameters will be a local maximum, but one my give a higher
 probability of $O$ than the other. There are many interesting techniques
-for finding the initial parameters that lead to the \emph{global
+for estimating the initial parameters that lead to the \emph{global
 maximum}, which include genetic algorithms and particle swarm
 algorithms. \cite{fang2012investigation}
 %Cite ``Investigation of Training Algorithms for Hidden Markov Models
