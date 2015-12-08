@@ -17,7 +17,7 @@ denoted as
   V = \{V_1, V_2, \ldots, V_M \}
 \end{equation}
 
-where $M$ is the number of symbols. The current time is denoted $t$
+where $M$ is the number of possible symbols. The current time is denoted $t$
 which ranges from $t=1, \ldots, \Tau$, and the state at the current
 time is denoted $q_t$. We need a separate letter for the state at the
 current time because the letter $S$ is indexed as a list of different
@@ -51,10 +51,10 @@ distribution is denoted $\pi$.
   \pi_i = \Pr[q_1 = S_i], \quad 1 \leq i \leq N
 \end{equation}
 
-Finally, we have a list of observation that is denoted
+Finally, we have a list of observations denoted
 
 \begin{equation}
-  O = O_1\ O_2\ \ldots\ \ O_\Tau
+  O = O_1\ O_2\ \ldots\ \ ,O_\Tau
 \end{equation}
 
 We will often begin with a list of observations $O$ and the goal will be
@@ -64,10 +64,10 @@ states $q_1,\ \ldots,\ q_\Tau$. Therefore, it is helpful to
 conceptualize $O$ as the ``input'' and the underlying states or the
 optimal model as the ``goal.''
 
-\subsection{Forwards Backwards}
+\subsection{Forwards-Backwards}
 
-The goal of the Forwards Backwards algorithm, and the first obvious goal
-of a Hidden Markov Model, is finding the likelihood that a sequence of
+The goal of the forwards-backwards algorithm, and the first obvious goal
+of a Hidden Markov Model, is finding the likelihood that a particular sequence of
 observations will happen. When thinking procedurally it is helpful to think of $O$ as our input,
 the rest of the model as the information we can access, and the
 probability of $O$ as the output. In notational terms, we are looking for $\Pr[O
@@ -104,7 +104,7 @@ tells us that the next state.
     \intertext{Because the first probability within sigma does not vary
     with $i$, we can pull it outside to get}
     &=  \Pr[O\ \vert \lambda] \sum_{i=1}^N \Pr[q_\Tau = S_i \vert O,\lambda]
-    \intertext{Because the model can not be in more than one state at
+    \intertext{Because the model cannot be in more than one state at
     any one time, the events that $q_\Tau = S_i$ given that $O,\lambda$
     happened for $1 \leq i \leq N$ are independent. And so the sum of
     their probabilities is equal to the probability of their union.
@@ -173,7 +173,7 @@ dynamic programming. The algorithm works as follows.
 This algorithm requires $N^2\Tau$ steps: $N\Tau$ steps for each entry in the
 array, and while filling each entry, there are $N$ steps to compute the
 sum that it involves. This $O(N^2\Tau)$ runtime algorithm is quite
-efficient when compared with the naive approach. (CITATION)
+efficient when compared with the naive approach of iterating over every possible sequence.
 
 Let us now define the ``Backwards Probability.''
 
@@ -187,7 +187,7 @@ will make calculations later on easier. We can define $\beta$ in a
 similar way to $\alpha$, and the probability returned by forwards
 backwards can also be found with $\beta$, but because we already have a way
 to do it with $\alpha$, we won't prove the properties of $\beta$ in as
-much detail. Beta will be used as a tool to derive other probabilities.
+much detail. $\beta$ will be used as a tool to derive other probabilities.
 It can be calculated using a similar recursive definition to $\alpha$.
 
 \begin{equation}
@@ -215,7 +215,7 @@ observed. Let's define the probability $\delta$ as follows.
   \delta_t(j) = \max_i[\delta_{t-1}(i)\ a_{ij}\ ] b_j(O_t)
 \end{equation}
 
-Note that delta is identical to $\alpha$ except in the recursive
+Note that $\delta$ is identical to $\alpha$ except in the recursive
 definition, instead of summing over the previous calls, $\delta$ maximizes
 over them. While summing gave the total probability that we observe the
 partial sequence of events and end up in state $S_i$ at time $t$,
